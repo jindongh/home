@@ -1,0 +1,59 @@
+{{template "header" .}}
+<h1>Day 7: Self hosted cloud storage for photos ith immich on Raspberry Pi 5</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+cat &lt; .env-compose &lt;&lt;EOF
+ARIA_PASSWORD=my-secret
+EOF
+
+cat &lt; docker-compose &lt;&lt;EOF
+services:
+  Aria2-Pro:
+    container_name: aria2-pro
+    image: p3terx/aria2-pro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK_SET=022
+      - RPC_SECRET=${ARIA_PASSWORD}
+      - RPC_PORT=6800
+      - LISTEN_PORT=6888
+      - DISK_CACHE=64M
+      - IPV6_MODE=false
+      - UPDATE_TRACKERS=true
+      - CUSTOM_TRACKER_URL=
+    volumes:
+      - ../data/aria2-config:/config
+      - ../data/aria2-downloads:/downloads
+    network_mode: host
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    env_file: .env
+
+  AriaNg:
+    container_name: ariang
+    image: p3terx/ariang
+    command: --port 6880 --ipv6
+    network_mode: host
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+EOF
+docker compose up -d
+</pre>
+
+<h2>Download</h2>
+The job is running, now you can login from the browser, http://raspberrypi.local:6880/#!/settings/ariang
+
+<b>Note</b>There will be an error complain password is wrong, you need to click RPC(xxx), and then put the password to the field "Aria2 RPC Secret Token"
+
+Now you can download torrent etc.
+
+<a href="/pi/book">Next: Day 8</a>
+{{template "footer" .}}

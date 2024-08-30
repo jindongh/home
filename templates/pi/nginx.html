@@ -1,0 +1,34 @@
+{{template "header" .}}
+<h1>Day 9: Nginx Proxy Manager</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+NGINX_ROOT=/ssd/nginx_data
+cat &lt; docker-compose.yaml &lt;&lt;EOF
+services:
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ${NGINX_ROOT}/nginx_data:/data
+      - ${NGINX_ROOT}/letsencrypt:/etc/letsencrypt
+EOF
+docker compose up -d
+</pre>
+
+<h2>Port Forwarding</h2>
+Configure the router to forward port 80 and 443 to the Raspberry pi.
+
+<h2>DNS</h2>
+You can register from DNS from <a href="https://www.duckdns.org/">DuckDNS</a>
+
+<h2>Setup Revert Proxy</h2>
+The job is running, now you can login from the browser, http://raspberrypi.local:81
+
+<a href="/pi/home">Next: Day 10</a>
+{{template "footer" .}}

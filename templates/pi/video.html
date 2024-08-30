@@ -1,0 +1,29 @@
+{{template "header" .}}
+<h1>Day 6: Media Server with JellyFin on Raspberry Pi</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+MEDIA_FILES=/ssd/media
+MEDIA_CONFIG=/ssd/media_config
+cat &lt; docker-compose.yaml &lt;&lt;EOF
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    network_mode: 'host'
+    volumes:
+      - ${MEDIA_CONFIG}/config:/config
+      - ${MEDIA_CONFIG}/cache:/cache
+      - ${MEDIA_FILES}:/media:ro
+    restart: 'unless-stopped'
+EOF
+docker compose up -d
+</pre>
+
+The job is running, now you can login from the browser, <a href="http://raspberrypi.local:8096">http://raspberrypi.local:8096</a>
+
+<h2>iphone client</h2>
+The iphone client can be downloaded from App Store with name <b>JellyFin</b>
+
+<a href="/pi/download">Next: Day 7</a>
+{{template "footer" .}}

@@ -1,0 +1,25 @@
+{{template "header" .}}
+<h1>Day 5: Self hosted cloud storage for photos ith immich on Raspberry Pi 5</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+IMMICH_ROOT=/ssd/immich_data
+cat &lt; .env &lt;&lt;EOF
+UPLOAD_LOCATION=${IMMICH_ROOT}/upload
+DB_DATA_LOCATION=${IMMICH_ROOT}/postgres
+IMMICH_VERSION=release
+DB_PASSWORD=postgres
+DB_USERNAME=postgres
+DB_DATABASE_NAME=immich
+EOF
+wget https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+docker compose up -d
+</pre>
+
+The job is running, now you can login from the browser, http://raspberrypi.local:2283
+
+<h2>iphone client</h2>
+The iphone client can be downloaded from App Store
+
+<a href="/pi/video">Next: Day 6</a>
+{{template "footer" .}}

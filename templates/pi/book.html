@@ -1,0 +1,45 @@
+{{template "header" .}}
+<h1>Day 8: Self hosted cloud storage for photos ith immich on Raspberry Pi 5</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+BOOK=/ssd/share/book
+cat &lt; docker-compose.yaml &lt;&lt;EOF
+services:
+    alist:
+        image: 'xhofe/alist:latest'
+        container_name: alist
+        volumes:
+            - ../data/alist:/opt/alist/data
+            - /ssd/share/book:/book:ro
+        network_mode: 'host'
+        environment:
+            - PUID=0
+            - PGID=0
+            - UMASK=022
+        restart: unless-stopped
+EOF
+docker compose up -d
+</pre>
+
+<h2>Access website</h2>
+The job is running, now you can login from the browser, http://raspberrypi.local:5244
+
+To add the book folder:
+<ol>
+<li>Click Manage</li>
+<li>Click Storage</li>
+<li>Click Add</li>
+<li>Choose Local</li>
+<li>Mount Path: /pi</li>
+<li>Root folder path: /boot</li>
+<li>Root folder path: /boot</li>
+<li>Click Save</li>
+</ol>
+
+<h2>Access using Boox</h2>
+You can also access from Boox reader, using webdav feature. The url of server is: http://raspberrypi.local:5244/dav/
+
+
+<a href="/pi/nginx">Next: Day 9</a>
+{{template "footer" .}}

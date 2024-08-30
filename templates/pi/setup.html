@@ -1,0 +1,70 @@
+{{template "header" .}}
+<h1>Day 1: Raspberry Pi 5 Setup</h1>
+
+There are different options to set up Raspberry Pi, but the easist is headless set up using <a href="https://www.raspberrypi.com/software/">Raspberry Pi Imager></a>, because it only requires a SSD and Power supply.
+
+<h2>Step 1: Hardware Preparation</h2>
+
+<ul>
+<li>
+Raspberry Pi 5: Buy from <a href="https://www.centralcomputer.com/raspberry-pi-5-8gb-ram-board.html">Central Computer<a> or <a href="https://www.amazon.com/s?k=raspberry+pi+5+8gb">Amazon</a>
+</li>
+<li>
+Micro SD Card with SD Adapter: Buy from <a href="https://www.centralcomputer.com/sandisk-sdsqqnr-064g-an6ia-64gb-high-enduranceuhs-i-microsdxc-memory-card-with-sd-adapter.html">Central Computer</a> or <a href="https://www.amazon.com/s?k=sd+card+with+sd+adapter">Amazon</a>
+</li>
+<li>
+USB-A & USB-C to Micro SD Card Reader(Optional, you don't need this if you have a Mac): Buy from <a href="https://www.centralcomputer.com/unitek-r1010a-usb3-0-usb-a-usb-c-to-micro-sd-sd-card-reader-space-gray.html">Central Computer</a>
+</li>
+<li>
+Power Supply(Optional, you can use your USB-C charger for your phone if you have): Buy from <a href="https://www.centralcomputer.com/raspberry-pi-27w-usb-c-power-supply-black.html">Central Computer</a> or <a href="https://www.amazon.com/s?k=raspberry+pi+power+supply">Amazon</a>
+</li>
+<li>
+Case(Optinal): Buy from <a href="https://www.centralcomputer.com/raspberry-pi-5-official-case-plastic-red-white.html">Central Computer</a> or <a href="https://www.amazon.com/s?k=raspbbery+pi+case">Amazon</a>
+</li>
+
+<h2>Step 2: Flash OS to Micro SD</h2>
+You can check the Youtube video here: https://youtu.be/ntaXWS8Lk34
+<ol>
+<li>
+Download and Install the software on you computer from <a href="https://www.raspberrypi.com/software/">Here</a>
+</li>
+<li>
+Insert SD Card into your computer.
+<ul>
+  <li>If you are using Mac, you can put the Micro SD Card with SD Adapter to the Mac SD reader slot.</li>
+  <li>If you are using Windows, you need the USB-A & USB-C to Micro SD Card Reader to connect Micro SD card to your computer.</li>
+</ul>
+</li>
+<li>
+Choose Operating System: 64 bit lite is recommended
+</li>
+<li>
+Click the gear icon to configure network etc. This step is important, it allows you preconfigure network connection and ssh service, so you can access it without connecting display and keyboard to your raspberry pi.
+<ol>
+  <li>check "Configure wireless LAN"</li>
+  <li>fill SSID with your WIFI name.</li>
+  <li>fill Password with your WIFI password.</li>
+  <li>check "Enable ssh"</li>
+  <li>fill the ssh password, you will need this to ssh to the raspberry pi in the next step.</li>
+</ol>
+</li>
+<li>
+Choose SD Card: Select the SD card you connected to your computer.
+</li>
+<li>
+Write and Verify SD.
+</li>
+</ol>
+
+
+<h2>Step 3: Start</h2>
+Insert the SD with flashed OS to Raspberry Pi, and then connect the Raspberry PI with power supply.
+
+Make sure your Computer and the Raspberry Pi are connected to the same WIFI network, then you can try to login the raspberry pi with username as pi and password you configured at Step 2.
+
+<pre class="prettyprint linenums">
+ssh pi@raspberrypi.local
+</pre>
+
+<a href="/pi/setup-with-ssd">Next: Day 2</a>
+{{template "footer" .}}

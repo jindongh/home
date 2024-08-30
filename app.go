@@ -38,6 +38,11 @@ func main() {
         Root: http.FS(staticfs),
         PathPrefix: "static",
     }))
+    app.Get("/pi/:action?", func(c *fiber.Ctx) error {
+        return c.Render("templates/pi/" + c.Params("action"), fiber.Map{
+            "Config": config,
+        })
+    })
     app.Get("/", func(c *fiber.Ctx) error {
         return c.Render("templates/index", fiber.Map{
             "Config": config,

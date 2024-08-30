@@ -1,0 +1,60 @@
+{{template "header" .}}
+<h1>Day 10: Home Page</h1>
+
+<h2>Start server</h2>
+<pre class="prettyprint linenums">
+# build
+git clone https://github.com/jindongh/home.git
+go build app.go
+
+# set up service
+cat &gt; /etc/systemd/system/home.service &lt;&lt;EOF
+[Unit]
+Description=home web site
+Wants=network-online.target
+After=network-online.target nss-lookup.target
+
+[Service]
+Type=exec
+Restart=always
+RestartSec=1
+User=pi
+UMask=0000
+ExecStart=/home/pi/home/app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat &gt; .env &lt;&lt;EOF
+PORT=9090
+NAME=jindongh
+URL_HOME=https://${NAME}.duckdns.org
+URL_VIDEO=https://${NAME}-video.duckdns.org
+URL_PHOTO=https://${NAME}-photo.duckdns.org
+URL_BOOK=https://${NAME}-book.duckdns.org
+URL_DOWNLOAD=https://${NAME}-download.duckdns.org
+EOF
+
+# start service
+sudo systemctl daemon-reload
+sudo systemctl start home
+sudo systemctl enable home
+</pre>
+
+<h2>Test Service</h2>
+The service should be running at <a href="http://raspberrypi.local:9090">http://raspberrypi.local:9090</a>
+
+<h2>Enable public access</h2>
+<ul>
+<li>
+Register DNS: <user>.duckdns.org
+</li>
+<li>
+Setup reverse proxy with http://raspberrypi.local:81
+</li>
+</ul>
+Now you can access it from public, like <a href="https://jindongh.duckdns.org">https://jindongh.duckdns.org</a>
+
+
+{{template "footer" .}}

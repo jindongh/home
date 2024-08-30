@@ -1,0 +1,84 @@
+{{template "header" .}}
+<h1>Day 4: Earn money with Raspberry Pi 5</h1>
+
+There are some website allows you share your internet or CPU to earn money, as the Raspberry pi only consumes a little power, so the earned money can cover its cost.
+
+<h2>Websites that can earn money</h2>
+You can register accounts from each of them, and run their service to earn money.
+<h3>earnapp</h3>
+You can register using this <a href="https://earnapp.com/i/jpiuf63">link</a>, and then run this command on raspberry pi:
+<pre class="prettyprint linenums">
+`wget -qO- https://brightdata.com/static/earnapp/install.sh > /tmp/earnapp.sh && sudo bash /tmp/earnapp.sh`
+</pre>
+And it will give you a link so you can login, then it is done.
+
+<h3>pawns</h3>
+You can register using this <a href="https://pawns.app/?r=6433705">link</a>, and then put the email and password in to a config file
+<pre class="prettyprint linenums">
+cat &gt;&gt; .env &lt;&lt; EOF
+PAWNS_EMAIL=user@abc.com
+PAWNS_PASSWORD=my-secret
+EOF
+</pre>
+
+<h3>repocket</h3>
+You can register using this <a href="https://link.repocket.com/1kih">link</a>, and then put the email and token in to a config file
+<pre class="prettyprint linenums">
+cat &gt;&gt; .env &lt;&lt; EOF
+RP_EMAIL=user@abc.com
+RP_API_KEY=abcdefg-1234-hiji-abcd-22222222222
+EOF
+</pre>
+
+<h3>honeygain</h3>
+You can register using this <a href="https://r.honeygain.me/JINDOCCA01">link</a>, and the put the email and password in to a config file
+<pre class="prettyprint linenums">
+cat &gt;&gt; .env &lt;&lt; EOF
+HONEYGAIN_EMAIL=user@abc.com
+HONEYGAIN_PASSWORD=my-secret
+EOF
+</pre>
+
+<h3>start docker</h3>
+With all the configurations added to .env file, you can start docker with
+<pre class="prettyprint linenums">
+cat &gt; .env &lt;&lt; EOF
+services:
+  pawns:
+    image: iproyal/pawns-cli
+    container_name: pawns
+    restart: always
+    network_mode: host
+    command: -email=${PAWNS_EMAIL} -password=${PAWNS_PASSWORD} -device-name=pi5-docker -accept-tos
+    env_file:
+      - .env
+  honeygain:
+    image: honeygain/honeygain
+    container_name: honeygain
+    restart: always
+    network_mode: host
+    command: -tou-accept -email ${HONEYGAIN_EMAIL} -pass ${HONEYGAIN_PASSWORD} -device pi5-new
+    env_file:
+      - .env
+  repocket:
+    image: repocket/repocket
+    container_name: repocket
+    restart: always
+    network_mode: host
+    environment:
+      - RP_EMAIL=${RP_EMAIL}
+      - RP_API_KEY=${RP_API_KEY}
+    env_file:
+      - .env
+EOF
+docker compose up -d
+</pre>
+That is all, you will see the node is running by checking logs
+<pre class="prettyprint linenums">
+docker logs repocket
+docker logs pawns
+docker logs honeygain
+</pre>
+
+<a href="/pi/photo">Next: Day 5</a>
+{{template "footer" .}}
