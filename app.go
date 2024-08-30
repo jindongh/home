@@ -14,6 +14,7 @@ import (
     "github.com/joho/godotenv"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/filesystem"
+    "github.com/gofiber/fiber/v2/middleware/session"
     "github.com/gofiber/template/html/v2"
 )
 
@@ -34,6 +35,7 @@ type config struct {
 }
 func main() {
     config := loadConfig()
+    store := session.New()
 
     // Initialize a new Fiber app
     app := fiber.New(fiber.Config{
@@ -49,7 +51,9 @@ func main() {
         })
     })
     app.Get("/", func(c *fiber.Ctx) error {
+        sess, _ := store.Get(c)
         return c.Render("templates/index", fiber.Map{
+            "Email": sess.Get("email"),
             "Config": config,
         })
     })
@@ -63,13 +67,18 @@ func main() {
         if err != nil {
             log.Fatal(err)
         }
-        return ctx.SendString(user.Email)
+        sess, _ := store.Get(ctx)
+        sess.Set("email", user.Email)
+        sess.Save()
+        return ctx.Redirect("/")
     })
     app.Get("/logout", func(ctx *fiber.Ctx) error {
         if err := goth_fiber.Logout(ctx); err != nil {
             log.Fatal(err)
         }
-        return ctx.SendString("logout")
+        sess, _ := store.Get(ctx)
+        sess.Destroy()
+        return ctx.Redirect("/")
     })
     // Start the server on port 
     log.Fatal(app.Listen("0.0.0.0:" + config.port))
