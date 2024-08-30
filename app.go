@@ -8,6 +8,9 @@ import (
     "path/filepath"
 
 
+    "github.com/markbates/goth"
+    "github.com/markbates/goth/providers/google"
+    "github.com/shareed2k/goth_fiber"
     "github.com/joho/godotenv"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -21,6 +24,8 @@ var staticfs embed.FS
 
 type config struct {
     port string
+    clientId string
+    clientSecret string
     HomeUrl string
     BookUrl string
     DownloadUrl string
@@ -49,6 +54,23 @@ func main() {
         })
     })
 
+    goth.UseProviders(
+        google.New(config.clientId, config.clientSecret, config.HomeUrl + "/auth/callback"),
+    )
+    app.Get("/login", goth_fiber.BeginAuthHandler)
+    app.Get("/auth/callback", func(ctx *fiber.Ctx) error {
+        user, err := goth_fiber.CompleteUserAuth(ctx)
+        if err != nil {
+            log.Fatal(err)
+        }
+        return ctx.SendString(user.Email)
+    })
+    app.Get("/logout", func(ctx *fiber.Ctx) error {
+        if err := goth_fiber.Logout(ctx); err != nil {
+            log.Fatal(err)
+        }
+        return ctx.SendString("logout")
+    })
     // Start the server on port 
     log.Fatal(app.Listen("0.0.0.0:" + config.port))
 }
@@ -64,6 +86,8 @@ func loadConfig() *config {
     godotenv.Load(dir + "/.env")
     return &config{
         port: os.Getenv("PORT"),
+        clientId: os.Getenv("GOOGLE_CLIENT_ID"),
+        clientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
         HomeUrl: os.Getenv("URL_HOME"),
         VideoUrl: os.Getenv("URL_VIDEO"),
         PhotoUrl: os.Getenv("URL_PHOTO"),
