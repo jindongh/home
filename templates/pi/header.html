@@ -8,6 +8,13 @@
 <div class="header">
     <div class="home left">
         <a href="/" title="Home">Home</a>
+{{if .Email}}
+        <a href="/admin" title="Admin">Todo</a>
+        <{{.Email}}
+        <a href="/logout" title="Logout">Logout</a>
+{{else}}
+        <a href="/login?provider=google">Login</a>
+{{end}}
     </div>
     <div class="nav right">
         <a href="{{.Config.VideoUrl}}">Video</a> |

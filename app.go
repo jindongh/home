@@ -33,6 +33,9 @@ type config struct {
     VideoUrl string
     PhotoUrl string
 }
+type service struct {
+    IsDownloadUp bool
+}
 func main() {
     config := loadConfig()
     store := session.New()
@@ -46,8 +49,18 @@ func main() {
         PathPrefix: "static",
     }))
     app.Get("/pi/:action?", func(c *fiber.Ctx) error {
+        sess, _ := store.Get(c)
         return c.Render("templates/pi/" + c.Params("action"), fiber.Map{
+            "Email": sess.Get("email"),
             "Config": config,
+        })
+    })
+    app.Get("/admin", func(c *fiber.Ctx) error {
+        sess, _ := store.Get(c)
+        return c.Render("templates/admin", fiber.Map{
+            "Email": sess.Get("email"),
+            "Config": config,
+            "Service": getService(),
         })
     })
     app.Get("/", func(c *fiber.Ctx) error {
@@ -102,5 +115,10 @@ func loadConfig() *config {
         PhotoUrl: os.Getenv("URL_PHOTO"),
         BookUrl: os.Getenv("URL_VIDEO"),
         DownloadUrl: os.Getenv("URL_DOWNLOAD"),
+    }
+}
+func getService() *service {
+    return &service{
+        IsDownloadUp: false,
     }
 }

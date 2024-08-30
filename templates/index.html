@@ -1,27 +1,5 @@
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-</head>
-<body>
-<div class="header">
-    <div class="home left">
-        <a href="/" title="Home">Home</a>
-{{if .Email}}
-        <a href="/" title="Self">{{.Email}}</a>
-        <a href="/logout" title="Logout">Logout</a>
-{{else}}
-        <a href="/login?provider=google">Login</a>
-{{end}}
-    </div>
-    <div class="nav right">
-        <a href="{{.Config.VideoUrl}}">Video</a> |
-        <a href="{{.Config.PhotoUrl}}">Photo</a> |
-        <a href="{{.Config.BookUrl}}">Book</a> |
-        <a href="{{.Config.DownloadUrl}}">Download</a>
-    </div>
-</div>
+{{template "header" .}}
 
-<div class="content">
     <h1>Home</h1>
     <ul>
         <li><a href="/pi/setup">Day 1: Raspberry Pi 5 Setup</a></li>
@@ -35,8 +13,5 @@
         <li><a href="/pi/nginx">Day 9: Public Access with Nginx Proxy Manager</a></li>
         <li><a href="/pi/home">Day 10: Home Page</a></li>
     </ul>
-</div>
 
-<link type="text/css" href="/static/default.css" rel="stylesheet" />
-</body>
-</html>
+{{template "footer" .}}

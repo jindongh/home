@@ -1,0 +1,10 @@
+{{template "header" .}}
+<h1>Admin</h1>
+
+{{if .Service.IsDownloadUp}}
+{{.Config.DownloadUrl}} is up <a href="/admin/download/down">Turn Down</a>
+{{else}}
+{{.Config.DownloadUrl}} is down <a href="/admin/download/up">Turn Up</a>
+{{end}}
+
+{{template "footer" .}}
