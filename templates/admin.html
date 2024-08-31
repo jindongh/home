@@ -1,10 +1,17 @@
 {{template "header" .}}
 <h1>Admin</h1>
 
-{{if .Service.IsDownloadUp}}
-{{.Config.DownloadUrl}} is up <a href="/admin/download/down">Turn Down</a>
-{{else}}
-{{.Config.DownloadUrl}} is down <a href="/admin/download/up">Turn Up</a>
+<ul>
+{{range .Services}}
+<li>
+  <a href="{{.Url}}">{{Title .Name}}</a> is
+  {{if .IsUp}}
+    up <a href="/admin/{{.Name}}/down">Turn Down</a>
+  {{else}}
+    down <a href="/admin/{{.Name}}/up">Turn Up</a>
+  {{end}}
+</li>
 {{end}}
+</ul>
 
 {{template "footer" .}}

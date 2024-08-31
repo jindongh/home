@@ -9,7 +9,7 @@
     <div class="home left">
         <a href="/" title="Home">Home</a>
 {{if .Email}}
-        <a href="/admin" title="Admin">Todo</a>
+        <a href="/admin" title="Admin">Admin</a>
         <{{.Email}}
         <a href="/logout" title="Logout">Logout</a>
 {{else}}
@@ -17,10 +17,11 @@
 {{end}}
     </div>
     <div class="nav right">
-        <a href="{{.Config.VideoUrl}}">Video</a> |
-        <a href="{{.Config.PhotoUrl}}">Photo</a> |
-        <a href="{{.Config.BookUrl}}">Book</a> |
-        <a href="{{.Config.DownloadUrl}}">Download</a>
+{{$separator := ""}}
+{{range .Config.Services}}
+        {{$separator}} <a href="{{.Url}}">{{Title .Name}}</a>
+        {{$separator = "|"}}
+{{end}}
     </div>
 </div>
 

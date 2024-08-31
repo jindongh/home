@@ -1,17 +1,15 @@
 package main
 
 import (
-    "context"
     "embed"
     "log"
     "net/http"
     "os"
     "path/filepath"
+    "strings"
 
-    containertypes "github.com/docker/docker/api/types/container"
-    apitypes "github.com/docker/docker/api/types"
-    "github.com/docker/docker/client"
     "github.com/markbates/goth"
+    "github.com/jindongh/home/docker"
     "github.com/markbates/goth/providers/google"
     "github.com/shareed2k/goth_fiber"
     "github.com/joho/godotenv"
@@ -20,7 +18,6 @@ import (
     "github.com/gofiber/fiber/v2/middleware/session"
     "github.com/gofiber/template/html/v2"
 )
-var downloadService = []string{"/aria2-pro", "/ariang"}
 
 //go:embed templates/*
 var viewsfs embed.FS
@@ -32,21 +29,22 @@ type config struct {
     clientId string
     clientSecret string
     HomeUrl string
-    BookUrl string
-    DownloadUrl string
-    VideoUrl string
-    PhotoUrl string
-}
-type service struct {
-    IsDownloadUp bool
+    Services []docker.ServiceConfig
 }
 func main() {
     config := loadConfig()
     store := session.New()
+    dockerService := docker.NewService()
 
     // Initialize a new Fiber app
+    engine := html.NewFileSystem(http.FS(viewsfs), ".html")
+    engine.AddFuncMap(map[string]interface{}{
+        "Title": func(s string) string {
+            return strings.Title(s)
+        },
+    })
     app := fiber.New(fiber.Config{
-        Views: html.NewFileSystem(http.FS(viewsfs), ".html"),
+        Views: engine,
     })
     app.Use("/static", filesystem.New(filesystem.Config{
         Root: http.FS(staticfs),
@@ -64,14 +62,15 @@ func main() {
         return c.Render("templates/admin", fiber.Map{
             "Email": sess.Get("email"),
             "Config": config,
-            "Service": getServices(),
+            "Services": dockerService.GetServiceStatus(),
         })
     })
     app.Get("/admin/:service?/:action?", func(ctx *fiber.Ctx) error {
+        service := ctx.Params("service")
         if ctx.Params("action") == "up" {
-            startService(downloadService)
+            dockerService.StartService(service)
         } else {
-            stopService(downloadService)
+            dockerService.StopService(service)
         }
         return ctx.Redirect("/admin")
     })
@@ -123,80 +122,7 @@ func loadConfig() *config {
         clientId: os.Getenv("GOOGLE_CLIENT_ID"),
         clientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
         HomeUrl: os.Getenv("URL_HOME"),
-        VideoUrl: os.Getenv("URL_VIDEO"),
-        PhotoUrl: os.Getenv("URL_PHOTO"),
-        BookUrl: os.Getenv("URL_VIDEO"),
-        DownloadUrl: os.Getenv("URL_DOWNLOAD"),
-    }
-}
-func getServices() *service {
-    cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-    if err != nil {
-        panic(err)
-    }
-    defer cli.Close()
-
-    if err != nil {
-        panic(err)
-    }
-    containers := findService(cli, downloadService)
-    isUp := true
-    for _, container := range(containers) {
-        if container.State != "running" {
-            log.Println("found container not running", container.Names, container.State)
-            isUp = false
-        }
-    }
-    return &service{
-        IsDownloadUp: isUp,
-    }
-}
-func startService(names []string) {
-    ctx := context.Background()
-    cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-    if err != nil {
-        panic(err)
-    }
-    defer cli.Close()
-    containers := findService(cli, names)
-    for _, container := range(containers) {
-        log.Println("begin start container", container.Names)
-        err = cli.ContainerStart(ctx, container.ID, containertypes.StartOptions{})
-        log.Println("finish start container", container.Names, err)
-    }
-}
-func stopService(names []string) {
-    ctx := context.Background()
-    cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-    if err != nil {
-        panic(err)
-    }
-    defer cli.Close()
-    containers := findService(cli, names)
-    log.Println("begin stop containers", len(containers))
-    for _, container := range(containers) {
-        log.Println("begin stop container", container.Names)
-        err = cli.ContainerStop(ctx, container.ID, containertypes.StopOptions{})
-        log.Println("finish stop container", container.Names, err)
+        Services: docker.GetServiceConfigs(),
     }
 }
 
-func findService(cli *client.Client, names []string) []*apitypes.Container {
-    ctx := context.Background()
-    containers, err := cli.ContainerList(ctx, containertypes.ListOptions{All: true})
-    if err != nil {
-        log.Fatalf("failed to find container", err)
-    }
-    matchContainers := []*apitypes.Container{}
-    for _, container := range containers {
-        for _, containerName := range(container.Names) {
-            for _, name := range(names) {
-                if containerName == name {
-                    log.Println("found match container", name, container.ID)
-                    matchContainers = append(matchContainers, &container)
-                }
-            }
-        }
-    }
-    return matchContainers
-}
