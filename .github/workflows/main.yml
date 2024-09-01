@@ -24,3 +24,4 @@ jobs:
         with:
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/home:latest
+          platforms: linux/arm64
