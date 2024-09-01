@@ -1,0 +1,69 @@
+{{template "header" .}}
+<h1>Free Oracle VM</h1>
+
+<h2>Create server</h2>
+* Choose Ubuntu
+* Paste .ssh/id_rsa.pub
+* Ignore the estimate cost, just click create
+* ssh from raspberry pi
+
+<h2>Install Docker</h2>
+This is the same as raspberry pi, see <a href="/pi/docker">here</a>
+
+<h2>Start nginx and alist</h2>
+
+<h3>Stat docker containers</h3>
+<pre class="prettyprint linenums">
+mkdir -p docker/{service,data} && cd docker/service
+cat &gt; docker-compose.yaml &lt;&lt;EOF
+version: '3.3'
+services:
+    nginx:
+        image: 'jc21/nginx-proxy-manager:latest'
+        container_name: nginx
+        restart: unless-stopped
+        ports:
+          - '80:80'
+          - '81:81'
+          - '443:443'
+        volumes:
+          - ../data/nginx_data:/data
+          - ../data/letsencrypt:/etc/letsencrypt
+    alist:
+        image: 'xhofe/alist:latest'
+        container_name: alist
+        volumes:
+            - ../data/alist:/opt/alist/data
+            - /ssd/share/book:/book:ro
+        network_mode: 'host'
+        environment:
+            - PUID=1001
+            - PGID=1001
+            - UMASK=022
+        restart: unless-stopped
+EOF
+docker compose up -d
+docker exec -it alist ./alist admin set changeme
+</pre>
+
+<h3>Setup Ingress Rules</h3>
+Allow traffic to port 80 81 443
+
+<h3>Setup iptables</h3>
+<pre class="prettyprint linenums">
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 5244  -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80  -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 81  -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443  -j ACCEPT
+sudo netfilter-persistent save
+</pre>
+
+The job is running, now you can login from the browser, http://<public-ip>:5244 using
+<pre class="prettyprint linenums">
+username: admin
+password: changeme
+</pre>
+
+You can also access http://&lt;public-ip&gt;:81 to set up proxy.
+
+{{template "footer" .}}

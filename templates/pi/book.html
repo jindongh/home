@@ -20,10 +20,15 @@ services:
         restart: unless-stopped
 EOF
 docker compose up -d
+docker exec -it alist ./alist admin set changeme
 </pre>
 
 <h2>Access website</h2>
-The job is running, now you can login from the browser, http://raspberrypi.local:5244
+The job is running, now you can login from the browser, http://raspberrypi.local:5244 with
+<pre class="prettyprint linenums">
+username: admin
+password: changeme
+</pre>
 
 To add the book folder:
 <ol>
@@ -40,6 +45,44 @@ To add the book folder:
 <h2>Access using Boox</h2>
 You can also access from Boox reader, using webdav feature. The url of server is: http://raspberrypi.local:5244/dav/
 
+<h2>Download using aria2</h2>
+
+<h2>Copy between cloud storage</h2>
+You can copy folder from one cloud to another, but sometimes it gets stuck, then mount davfs will work.
+<ol>
+<li>First mount(remember to disable 2FA)</li>
+<pre class="prettyprint linenums">
+sudo apt install davfs2
+sudo mount -t davfs http://192.168.86.112:5244/dav/ /mnt
+</pre>
+<li>Then copy by file</li>
+<pre class="prettyprint linenums">
+cat clone
+#!/bin/bash
+set -x
+SRC=/home/pi/data/google
+DEST=/home/pi/data/aliyun
+SRC_FOLDER=/mnt/google/全部媒体
+DEST_FOLDER=/mnt/aliyun/全部媒体
+#cat $SRC | while read -r file
+IFS=$'\n'
+i=0
+for file in $(cat $SRC)
+do
+    FOUND=$(grep -e "^$file$" $DEST|wc -l)
+    if [[ $FOUND -gt 0 ]]; then
+        echo "$file already downloaded"
+    else
+        echo cp "$SRC_FOLDER/$file" "$DEST_FOLDER/$file"
+        i=$((i+1))
+        if [[ $((i%100)) -eq 0 ]];then
+            read -p "please enter to continue"
+        fi
+        cp "$SRC_FOLDER/$file" "$DEST_FOLDER/$file"
+    fi
+done
+sudo bash clone
+</pre>
 
 <a href="/pi/nginx">Next: Day 9</a>
 {{template "footer" .}}
