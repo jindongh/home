@@ -70,12 +70,14 @@ You can also access http://&lt;public-ip&gt;:81 to set up proxy.
 <li>Set up the vncserver</li>
 <pre class="prettyprint linenums">
 sudo apt update
-sudo apt install xfce4 xfce4-goodies
+sudo apt install xfce4 xfce4-goodies firefox
 sudo apt install tightvncserver
 vncserver
 vncserver -kill :1
 cat ~/.vnc/xstartup
 #!/bin/bash
+XAUTHORITY=$HOME/.Xauthority
+export XAUTHORITY
 xrdb $HOME/.Xresources
 startxfce4 &
 vncserver
