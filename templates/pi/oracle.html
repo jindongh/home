@@ -63,7 +63,29 @@ The job is running, now you can login from the browser, http://<public-ip>:5244 
 username: admin
 password: changeme
 </pre>
-
 You can also access http://&lt;public-ip&gt;:81 to set up proxy.
+
+<h3>VNC</h3>
+<ol>
+<li>Set up the vncserver</li>
+<pre class="prettyprint linenums">
+sudo apt update
+sudo apt install xfce4 xfce4-goodies
+sudo apt install tightvncserver
+vncserver
+vncserver -kill :1
+cat ~/.vnc/xstartup
+#!/bin/bash
+xrdb $HOME/.Xresources
+startxfce4 &
+vncserver
+</pre>
+<li>Allow vnc access in iptable</li>
+<pre class="prettyprint linenums">
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 5901  -j ACCEPT
+sudo netfilter-persistent save
+</pre>
+<li>Allow vnc access in OCI</li>
+<li>Access from Finder: Finder -> Go -> Connecto to Server: vnc://&lt;public-ip&gt;:5901</li>
 
 {{template "footer" .}}
