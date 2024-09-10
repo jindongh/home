@@ -90,4 +90,53 @@ sudo netfilter-persistent save
 <li>Allow vnc access in OCI</li>
 <li>Access from Finder: Finder -> Go -> Connecto to Server: vnc://&lt;public-ip&gt;:5901</li>
 
+<h3>Disk space</h3>
+<li>Increase disk space first</li>
+<li>Rescan using the command, eg:</li>
+<pre class="prettyprint linenums">
+sudo dd iflag=direct if=/dev/oracleoci/oraclevda of=/dev/null count=1
+echo "1" | sudo tee /sys/class/block/`readlink /dev/oracleoci/oraclevda | cut -d'/' -f 2`/device/rescan
+</pre>
+<li>grow the fs</li>
+<pre class="prettyprint linenums">
+sudo growpart /dev/sda 1
+sudo resize2fs /dev/sda1
+</pre>
+
+<h3>Webssh</h3>
+<li>Enable password login with 2FA</li>
+<pre class="prettyprint linenums">
+sudo tee /etc/ssh/sshd_config.d/60-cloudimg-settings.conf &lt;&lt; EOF
+PasswordAuthentication yes
+EOF
+sudo passwd ubuntu
+sudo apt install libpam-google-authenticator
+sudo tee -a /etc/pam.d/sshd &lt;&lt;EOF
+auth required pam_google_authenticator.so
+EOF
+sudo sed -i 's/KbdInteractiveAuthentication no/KbdInteractiveAuthentication yes/g' /etc/ssh/sshd_config
+sudo systemctl restart ssh.service
+
+</pre>
+<li>Start docker with wetty</li>
+<pre class="prettyprint linenums">
+cat &gt; ssh.yaml &lt;&lt;EOF
+name: ssh
+networks:
+  default:
+    name: ssh
+services:
+  ssh:
+    image: wettyoss/wetty
+    container_name: ssh
+    restart: always
+    command: wetty --ssh-host=host.docker.internal --ssh-auth=keyboard-interactive
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+EOF
+docker compose -f ssh.yaml up -d
+docker compose -f nginx.yaml up -d
+https://ssh.<domain>/wetty
+</pre>
+
 {{template "footer" .}}
