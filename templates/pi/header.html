@@ -8,9 +8,10 @@
 <div class="header">
     <div class="home left">
         <a href="/" title="Home">Home</a>
+        <a href="/piano" title="Piano">Piano</a>
 {{if .Email}}
         <a href="/admin" title="Admin">Admin</a>
-        <{{.Email}}
+        {{.Email}}
         <a href="/logout" title="Logout">Logout</a>
 {{else}}
         <a href="/login?provider=google">Login</a>

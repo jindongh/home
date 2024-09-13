@@ -81,6 +81,14 @@ func main() {
             "Config": config,
         })
     })
+    app.Get("/piano", func(c *fiber.Ctx) error {
+        sess, _ := store.Get(c)
+        return c.Render("templates/piano", fiber.Map{
+            "Email": sess.Get("email"),
+            "Config": config,
+	    "Action": "piano",
+        })
+    })
 
     goth.UseProviders(
         google.New(config.clientId, config.clientSecret, config.HomeUrl + "/auth/callback"),
