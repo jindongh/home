@@ -4,6 +4,8 @@ COPY *.go ./
 COPY go.mod go.sum ./
 RUN go mod download
 COPY docker/ ./docker
+COPY common/ ./common
+COPY piano/ ./piano
 COPY static/ ./static
 COPY templates/ ./templates
 RUN ls --recursive ./
