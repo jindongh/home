@@ -1,0 +1,83 @@
+{{template "header" . }}
+
+<h1>OpenWRT Shadowsocks</h1>
+
+<h2>Shadowsocks server</h2>
+<pre class="prettyprint linenums">
+sudo apt install shadowsocks-libev
+cat /etc/shadowsocks-libev/config.json
+{
+    "server":["0.0.0.0"],
+    "mode":"tcp_and_udp",
+    "server_port":8888,
+    "local_port":1080,
+    "password":"<secret>",
+    "timeout":86400,
+    "method":"chacha20-ietf-poly1305"
+}
+</pre>
+
+<h2>Shadowsocks in OpenWRT</h2>
+<p>Firstly install the software: System -&gt; Software, search and install luci-app-shadowsocks-libev
+<p>Then we can either config it through UI or config file.
+<h3>Option 1: through UI</h3>
+<ol>
+	<li>Remote Server: the connection to remote shadowsocks server</li>
+	<li>ss_redir: This defines a local proxy pointing to the remote server</li>
+	<li>Tunnel: the tunnel can be used to route DNS request, avoid gfw</li>
+	<li>ss_server: ss_server can start an ss_server in the OpenWRT for others to consume</li>
+	<li>Redir Rules: this defines the rules when to redirect or bypass</li>
+</ol>
+
+<h3>Option 2: through config</h3>
+/etc/config/shadowsocks-libev
+<pre class="prettyprint linenums">
+config server 'sss0'
+	option server '<ip>'
+	option server_port '8888'
+	option method 'chacha20-ietf-poly1305'
+	option password '<secret>'
+
+config ss_tunnel
+	option server 'sss0'
+	option local_address '0.0.0.0'
+	option local_port '8053'
+	option tunnel_address '8.8.8.8:53'
+	option mode 'tcp_and_udp'
+	option disabled '0'
+
+config ss_redir 'ssr0'
+	option server 'sss0'
+	option local_address '0.0.0.0'
+	option local_port '1100'
+	option mode 'tcp_and_udp'
+	option reuse_port '1'
+	option disabled '0'
+
+config ss_rules 'ss_rules'
+	option redir_tcp 'ssr0'
+	option redir_udp 'ssr0'
+	option src_default 'checkdst'
+	option dst_default 'bypass'
+	option local_default 'bypass'
+
+config ss_server
+	option server_port '8888'
+	option password '<secret>'
+	option method 'chacha20-ietf-poly1305'
+	option mode 'tcp_and_udp'
+</pre>
+
+<h2>Route by IP</h2>
+We can only route specify IP to shadowsocks, there is a list here:
+Download the ip list from https://github.com/shadowsocks/ChinaDNS/blob/master/chnroute.txt
+to /etc/shadowsocks-libev/chinadns_chnroute.txt
+
+And then config it through UI: Services -&gt; Shadowsocks-libev -&gt; Redir Rules -&gt; Destination Settings -&gt; Dst ip/net forward file
+or config file /etc/config/shadowsocks-libev
+<pre class="prettyprint linenums">
+config ss_rules 'ss_rules'
+	option dst_ips_forward_file '/etc/shadowsocks-libev/chinadns_chnroute.txt'
+</pre>
+
+{{template "footer" .}}
