@@ -1,0 +1,35 @@
+{{template "header" . }}
+
+<h1>OpenWRT DynamicDNS with DigitalOcean</h1>
+
+<h2>Get Token from Digital Ocean</h2>
+API -&gt; Generate New Token
+
+<h2>Get record id from DigitalOcean</h2>
+<pre class="prettyprint linenums">
+ACCESS_TOKEN=<token>
+DOMAIN=nil.pp.ua
+curl \
+  --silent \
+  -X GET \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://api.digitalocean.com/v2/domains/$DOMAIN/records"
+</pre>
+
+<h2>Install software</h2>
+System -&gt; Software -&gt; search and install ddns-scripts-digitalocean
+
+<h2>Configure ddns</h2>
+Services -&gt; Dynamic DNS -&gt; Add new services -&gt; select digital ocean.
+
+Edit 
+<ul>
+	<li>Lookup hostname: nil.pp.ua</li>
+	<li>Domain: nil.pp.ua</li>
+	<li>Username: @</li>
+	<li>Password: <token> from previous step</li>
+	<li>Optional Parameter: record id from previous step</li>
+</ul>
+
+{{template "footer" .}}
