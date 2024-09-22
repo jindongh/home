@@ -1,0 +1,29 @@
+{{template "header" . }}
+
+<h1>OpenWRT DNS</h1>
+
+<h2>Download DNS list from github</h2>
+<pre class="prettyprint linenums">
+curl -O https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/refs/heads/master/install.sh
+chmod +x install.sh
+./install.sh
+</pre>
+
+<h2>Configure the list in DNS</h2>
+Login the openwrt UI: Network -&gt; DHCP and DNS -&gt; Advanced Settings:
+
+Additional servers file:/etc/dnsmasq.d/accelerated-domains.china.114.114.114.114.conf
+
+Save and Apply.
+
+Note: it seems the dnsmasq takes time to load the config, wait for a few minutes and verify with dig.
+
+<pre class="prettyprint linenums">
+opkg install bind-dig
+# dig 
+dig @114.114.114.114 www.iqiyi.com
+dig @8.8.8.8 www.iqiyi.com
+dig www.iqiyi.com
+</pre>
+
+{{template "footer" .}}

@@ -50,6 +50,13 @@ func main() {
             "Config": config,
         })
     })
+    app.Get("/openwrt/:action?", func(c *fiber.Ctx) error {
+        sess, _ := store.Get(c)
+        return c.Render("templates/openwrt/" + c.Params("action"), fiber.Map{
+            "Email": sess.Get("email"),
+            "Config": config,
+        })
+    })
     app.Get("/admin", func(c *fiber.Ctx) error {
         sess, _ := store.Get(c)
         return c.Render("templates/admin", fiber.Map{
