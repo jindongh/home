@@ -4,15 +4,14 @@ import (
     "embed"
     "log"
     "net/http"
-    "os"
-    "path/filepath"
     "strings"
 
     "github.com/markbates/goth"
+    "github.com/jindongh/home/common"
     "github.com/jindongh/home/docker"
+    "github.com/jindongh/home/piano"
     "github.com/markbates/goth/providers/google"
     "github.com/shareed2k/goth_fiber"
-    "github.com/joho/godotenv"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/filesystem"
     "github.com/gofiber/fiber/v2/middleware/session"
@@ -24,15 +23,9 @@ var viewsfs embed.FS
 //go:embed static/*
 var staticfs embed.FS
 
-type config struct {
-    port string
-    clientId string
-    clientSecret string
-    HomeUrl string
-    Services []docker.ServiceConfig
-}
 func main() {
-    config := loadConfig()
+    config := common.LoadConfig()
+    piano.Connect()
     store := session.New()
     dockerService := docker.NewService()
 
@@ -81,17 +74,9 @@ func main() {
             "Config": config,
         })
     })
-    app.Get("/piano", func(c *fiber.Ctx) error {
-        sess, _ := store.Get(c)
-        return c.Render("templates/piano", fiber.Map{
-            "Email": sess.Get("email"),
-            "Config": config,
-	    "Action": "piano",
-        })
-    })
-
+    piano.Route(app, store, config)
     goth.UseProviders(
-        google.New(config.clientId, config.clientSecret, config.HomeUrl + "/auth/callback"),
+        google.New(config.ClientId, config.ClientSecret, config.HomeUrl + "/auth/callback"),
     )
     app.Get("/login", goth_fiber.BeginAuthHandler)
     app.Get("/auth/callback", func(ctx *fiber.Ctx) error {
@@ -113,24 +98,5 @@ func main() {
         return ctx.Redirect("/")
     })
     // Start the server on port 
-    log.Fatal(app.Listen("0.0.0.0:" + config.port))
+    log.Fatal(app.Listen("0.0.0.0:" + config.Port))
 }
-
-func loadConfig() *config {
-    ex, err := os.Executable()
-    if err != nil {
-        panic(err)
-    }
-
-    // Get the directory of the executable.
-    dir := filepath.Dir(ex)
-    godotenv.Load(dir + "/.env")
-    return &config{
-        port: os.Getenv("PORT"),
-        clientId: os.Getenv("GOOGLE_CLIENT_ID"),
-        clientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-        HomeUrl: os.Getenv("URL_HOME"),
-        Services: docker.GetServiceConfigs(),
-    }
-}
-

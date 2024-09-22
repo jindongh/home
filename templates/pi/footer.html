@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/static/default.js"></script>
 {{if eq .Action "piano"}}
 <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.2/dist/abcjs-basic-min.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/abcjs@6.4.2/abcjs-audio.min.css" rel="stylesheet"/>
 <script type="text/javascript">
 	function selectionCallback(abcelem) {
@@ -61,6 +62,53 @@
 	}
 
 	window.addEventListener("load", initEditor, false);
+
+	function loadList() {
+		$.get("/api/piano", function(data, status) {
+			$("#songList").empty();
+			$(data.data).each(function(index, song){
+				$("#songList").append("<li id='" + song.id + "'>"
+					+ "<a href='#' onclick='return loadSong(\"" + song.ID + "\");'>" + song.title + "</a>"
+						+ "</li>");
+				console.log(song);
+			});
+		});
+	}
+	function loadSong(id) {
+		$.get("/api/piano/" + id, function(data, status) {
+			$("#abc").val(data.data.content).change();
+			$("#delete").attr("song", data.data.ID);
+			console.log(data);
+		});
+		return false;
+	}
+	$(function(){
+		loadList();
+		if ({{.ID }} != null) {
+			loadSong({{.ID}});
+		}
+		$("#create").click(function() {
+			console.log("creating song");
+			$.post("/api/piano",
+				{
+					content: $("#abc").val(),
+				},
+				function(data, status) {
+					console.log("song created");
+					loadList();
+				});
+		});
+		$("#delete").click(function() {
+			var id = $("#delete").attr("song");
+			$.ajax({
+				type: "DELETE",
+				url: "/api/piano/" + id,
+			}).done(function( msg ) {
+				console.log(msg);
+				loadList();
+			});
+		});
+	});
 </script>
 {{end}}
 </body>

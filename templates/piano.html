@@ -1,11 +1,24 @@
 {{template "header" . }}
 
 <h1>Piano</h1>
+<table width="100%">
+	<tr>
+		<td width="80%">
 <textarea id="abc" cols="80" rows="12" spellcheck="false">X: 1
 T: ABC Music
 M: 4/4
 L: 1/8
 |:CDEF  GABc | cdef gabc':|</textarea>
+<button id="create">Save</button>
+<button id="delete">Delete</button>
+		</td>
+		<td width="20%">
+			<div id="songListDiv">
+				<ul id="songList"></ul>
+			</div>
+		</td>
+	</tr>
+</table>
 <div id="warnings"></div>
 <div id="audio"></div>
 <div id="paper" class="music-paper"></div>
